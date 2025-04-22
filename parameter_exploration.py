@@ -27,7 +27,7 @@ def main():
                         help='Directory containing flash and nonflash subdirectories')
     parser.add_argument('--output_dir', type=str, default='results/param_exploration', 
                         help='Directory to save results')
-    parser.add_argument('--image_name', type=str, default='cave-flash.jpg', 
+    parser.add_argument('--image_name', type=str, default='1.jpg', 
                         help='Image filename to process')
     
     args = parser.parse_args()
