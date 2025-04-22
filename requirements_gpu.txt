@@ -1,0 +1,8 @@
+numpy>=1.19.0
+opencv-python>=4.5.0
+opencv-contrib-python>=4.5.0
+matplotlib>=3.3.0
+argparse>=1.4.0
+# Below are additional requirements for GPU support
+# Note: CUDA Toolkit must be installed separately on your system
+cudatoolkit>=11.0 
