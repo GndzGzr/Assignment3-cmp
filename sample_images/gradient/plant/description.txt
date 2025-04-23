@@ -1,0 +1,4 @@
+Sample: plant
+Technique: gradient
+Description: Plant - Flash vs No Flash
+Source: Flash/No-Flash Image Collection

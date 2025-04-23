@@ -1,0 +1,4 @@
+Sample: toys
+Technique: bilateral
+Description: Toys - Flash vs No Flash
+Source: Flash/No-Flash Image Collection

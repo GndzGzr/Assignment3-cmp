@@ -1,0 +1,4 @@
+Sample: statue
+Technique: gradient
+Description: Statue - Flash vs No Flash
+Source: Flash/No-Flash Image Collection

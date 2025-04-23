@@ -1,0 +1,4 @@
+Sample: synthetic2
+Technique: gradient
+Description: Object with specular highlights (Synthetic)
+Source: Generated synthetic pair

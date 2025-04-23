@@ -36,7 +36,16 @@ def process_bilateral_pair(data_dir, flash_name, noflash_name, output_dir,
     
     # Load images
     try:
-        ambient, flash = image_utils.load_flash_no_flash_pair(data_dir, flash_name, noflash_name)
+        # Direct file paths instead of assuming subdirectories
+        flash_path = os.path.join(data_dir, flash_name)
+        noflash_path = os.path.join(data_dir, noflash_name)
+        
+        # Check if files exist directly
+        if os.path.exists(flash_path) and os.path.exists(noflash_path):
+            ambient, flash = image_utils.load_flash_no_flash_pair(data_dir, flash_name, noflash_name)
+        else:
+            print(f"Files not found at: {flash_path} and {noflash_path}")
+            return None
         print("Images loaded successfully")
     except Exception as e:
         print(f"Error loading images: {e}")
@@ -85,7 +94,16 @@ def process_gradient_pair(data_dir, flash_name, noflash_name, output_dir,
     
     # Load images
     try:
-        ambient, flash = image_utils.load_flash_no_flash_pair(data_dir, flash_name, noflash_name)
+        # Direct file paths instead of assuming subdirectories
+        flash_path = os.path.join(data_dir, flash_name)
+        noflash_path = os.path.join(data_dir, noflash_name)
+        
+        # Check if files exist directly
+        if os.path.exists(flash_path) and os.path.exists(noflash_path):
+            ambient, flash = image_utils.load_flash_no_flash_pair(data_dir, flash_name, noflash_name)
+        else:
+            print(f"Files not found at: {flash_path} and {noflash_path}")
+            return None
         print("Images loaded successfully")
     except Exception as e:
         print(f"Error loading images: {e}")

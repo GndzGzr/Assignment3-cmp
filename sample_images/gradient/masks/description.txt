@@ -1,0 +1,4 @@
+Sample: masks
+Technique: gradient
+Description: Masks with both specular highlights and shadows
+Source: https://raw.githubusercontent.com/marichardson/flash-no-flash

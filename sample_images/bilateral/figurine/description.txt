@@ -1,0 +1,3 @@
+Sample: figurine
+Technique: bilateral
+Description: Figurine in a dark setting, good for denoising

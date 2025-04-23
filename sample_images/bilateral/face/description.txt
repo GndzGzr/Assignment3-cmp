@@ -1,0 +1,4 @@
+Sample: face
+Technique: bilateral
+Description: Face - Flash vs No Flash
+Source: Flash/No-Flash Image Collection

@@ -1,0 +1,4 @@
+Sample: books
+Technique: bilateral
+Description: Books - Flash vs No Flash
+Source: Flash/No-Flash Image Collection
