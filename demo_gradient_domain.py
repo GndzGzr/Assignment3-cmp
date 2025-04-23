@@ -20,11 +20,11 @@ from classes_functions import GradientDomainProcessor, ImageUtils
 def main():
     # Parse command line arguments
     parser = argparse.ArgumentParser(description='Demo for Gradient-Domain Flash/No-Flash photography techniques')
-    parser.add_argument('--data_dir', type=str, default='data/face', 
+    parser.add_argument('--data_dir', type=str, default='data/camera/face', 
                         help='Directory containing flash and nonflash subdirectories')
     parser.add_argument('--output_dir', type=str, default='results_gradient', 
                         help='Directory to save results')
-    parser.add_argument('--image_name', type=str, default='face-flash.jpg', 
+    parser.add_argument('--image_name', type=str, default='1.jpg', 
                         help='Image filename to process')
     parser.add_argument('--test_poisson', action='store_true',
                         help='Test Poisson solver by differentiating and re-integrating an image')

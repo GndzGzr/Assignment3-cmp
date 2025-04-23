@@ -71,7 +71,7 @@ class PoissonSolver:
         """
         # Compute partial derivatives of the gradient components
         if len(grad_x.shape) == 3:  # Color image
-            div = np.zeros_like(grad_x[:,:,0])
+            div = np.zeros_like(grad_x)
             
             for c in range(grad_x.shape[2]):
                 # Compute partial derivatives using Sobel
@@ -79,9 +79,7 @@ class PoissonSolver:
                 grad_yy = cv2.Sobel(grad_y[:,:,c], cv2.CV_32F, 0, 1, ksize=3)
                 
                 # Divergence is the sum of partial derivatives
-                div += grad_xx + grad_yy
-            
-            div = div / grad_x.shape[2]  # Average over channels
+                div[:,:,c] = grad_xx + grad_yy
         else:  # Grayscale image
             grad_xx = cv2.Sobel(grad_x, cv2.CV_32F, 1, 0, ksize=3)
             grad_yy = cv2.Sobel(grad_y, cv2.CV_32F, 0, 1, ksize=3)
@@ -100,6 +98,19 @@ class PoissonSolver:
         Returns:
             Scalar dot product
         """
+        # Make sure a and b have the same shape
+        if a.shape != b.shape:
+            if len(a.shape) > len(b.shape):
+                # If a has more dimensions than b, expand b
+                b = np.expand_dims(b, axis=-1)
+                if len(a.shape) == 3:
+                    b = np.repeat(b, a.shape[2], axis=2)
+            elif len(b.shape) > len(a.shape):
+                # If b has more dimensions than a, expand a
+                a = np.expand_dims(a, axis=-1)
+                if len(b.shape) == 3:
+                    a = np.repeat(a, b.shape[2], axis=2)
+        
         return np.sum(a * b)
 
     def conjugate_gradient_descent(self, divergence, boundary_mask, boundary_values, 
@@ -131,7 +142,19 @@ class PoissonSolver:
         I_star = boundary_mask * I_star + (1 - boundary_mask) * boundary_values
         
         # Initialize residual
-        r = boundary_mask * (divergence - self.laplacian_filtering(I_star))
+        laplacian_I_star = self.laplacian_filtering(I_star)
+        
+        # Make sure divergence has the same shape as laplacian_I_star for proper broadcasting
+        if len(divergence.shape) != len(laplacian_I_star.shape):
+            if len(divergence.shape) == 2 and len(laplacian_I_star.shape) == 3:
+                # Expand divergence to match the channels in laplacian_I_star
+                divergence = np.expand_dims(divergence, axis=-1)
+                divergence = np.repeat(divergence, laplacian_I_star.shape[2], axis=2)
+            elif len(divergence.shape) == 3 and len(laplacian_I_star.shape) == 2:
+                # Take average of divergence channels
+                divergence = np.mean(divergence, axis=2)
+        
+        r = boundary_mask * (divergence - laplacian_I_star)
         
         # Initialize search direction
         d = r.copy()
@@ -324,21 +347,15 @@ class PoissonSolver:
             Integrated fused image
         """
         # Compute divergence of the fused gradient field
+        print("Integrating fused gradient field...")
         divergence = self.compute_divergence(fused_grad_x, fused_grad_y)
         
         # Create boundary mask
-        if len(ambient_image.shape) == 3:  # Color image
-            boundary_mask = np.ones_like(ambient_image)
-            boundary_mask[0, :, :] = 0  # Top edge
-            boundary_mask[-1, :, :] = 0  # Bottom edge
-            boundary_mask[:, 0, :] = 0  # Left edge
-            boundary_mask[:, -1, :] = 0  # Right edge
-        else:  # Grayscale image
-            boundary_mask = np.ones_like(ambient_image)
-            boundary_mask[0, :] = 0  # Top edge
-            boundary_mask[-1, :] = 0  # Bottom edge
-            boundary_mask[:, 0] = 0  # Left edge
-            boundary_mask[:, -1] = 0  # Right edge
+        boundary_mask = np.ones_like(ambient_image)
+        boundary_mask[0, :] = 0  # Top edge
+        boundary_mask[-1, :] = 0  # Bottom edge
+        boundary_mask[:, 0] = 0  # Left edge
+        boundary_mask[:, -1] = 0  # Right edge
         
         # Set boundary values based on boundary_type
         if boundary_type == "ambient":
