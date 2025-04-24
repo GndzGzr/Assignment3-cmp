@@ -1,4 +1,0 @@
-Sample: flowers
-Technique: gradient
-Description: Flowers - Flash vs No Flash
-Source: Flash/No-Flash Image Collection

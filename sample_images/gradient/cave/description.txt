@@ -1,4 +1,0 @@
-Sample: cave
-Technique: gradient
-Description: Cave entrance with mixed lighting conditions
-Source: https://raw.githubusercontent.com/marichardson/flash-no-flash

@@ -1,4 +1,0 @@
-Sample: memorial
-Technique: bilateral
-Description: Indoor memorial scene with low lighting
-Source: https://raw.githubusercontent.com/marichardson/flash-no-flash

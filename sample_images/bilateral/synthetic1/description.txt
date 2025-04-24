@@ -1,4 +1,0 @@
-Sample: synthetic1
-Technique: bilateral
-Description: Indoor scene with simulated flash (Synthetic)
-Source: Generated synthetic pair

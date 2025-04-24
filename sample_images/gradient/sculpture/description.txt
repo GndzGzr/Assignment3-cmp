@@ -1,3 +1,0 @@
-Sample: sculpture
-Technique: gradient
-Description: Sculpture with both specular highlights and shadows

@@ -1,4 +1,0 @@
-Sample: desk
-Technique: bilateral
-Description: Desk scene in dim lighting, good for denoising
-Source: https://raw.githubusercontent.com/marichardson/flash-no-flash
