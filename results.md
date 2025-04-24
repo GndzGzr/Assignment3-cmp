@@ -345,44 +345,51 @@ The first image pair was captured in a dimly lit environment, making it ideal fo
 #### 3.1.1 Input Images
 
 ![Pair 1 - Ambient Image](results_part3/pair1_bilateral/ambient.png)
-*Figure 19: Ambient image from pair 1, showing significant noise in dark regions but natural lighting.*
+*Figure 19: Ambient image from pair 1, showing a dimly lit indoor scene with visible noise in darker regions.*
 
 ![Pair 1 - Flash Image](results_part3/pair1_bilateral/flash.png)
-*Figure 20: Flash image from pair 1, with clear details but harsh lighting and potential flash artifacts.*
+*Figure 20: Flash image from pair 1, showing much clearer details but with harsh, uneven lighting and strong shadows.*
+
+The ambient image is significantly underexposed with visible noise in the darker areas, particularly in the shadowed regions of the scene. Colors appear muted and details are lost in shadows. In contrast, the flash image is well-exposed with clear details throughout, but suffers from harsh lighting, strong shadows, and an unnatural appearance typical of direct flash photography.
 
 #### 3.1.2 Processing Steps and Results
 
-The bilateral filtering pipeline was applied to this image pair using the optimal parameters determined from previous experiments:
-- sigma_s_basic = 8.0
-- sigma_r_basic = 0.1
-- sigma_s_joint = 8.0
-- sigma_r_joint = 0.1
-- epsilon = 0.02
-- shadow_thresh = 0.1
-- spec_thresh = 0.9
+The bilateral filtering pipeline was applied to this image pair using the optimal parameters determined from previous experiments. Each step of the process contributes to the final result:
 
 ![Pair 1 - Bilateral Processing Results](results_part3/pair1_bilateral/comparison.png)
-*Figure 21: Comparison of all steps in the bilateral filtering pipeline applied to the custom image pair.*
+*Figure 21: Complete processing pipeline applied to the custom image pair, showing all stages of the bilateral filtering approach.*
 
-The final result effectively combines the advantages of both input images:
-- The noise in dark regions is significantly reduced.
-- The details and textures are preserved from the flash image.
-- The natural lighting from the ambient image is maintained.
-- Flash artifacts such as harsh shadows and specularities are mitigated.
+The key intermediate results show the progressive improvement of the image:
+
+1. **Basic Bilateral Filtering (a_base)**: Reduces noise in the ambient image, resulting in smoother textures but also less detail compared to the original ambient image. Dark areas remain underexposed but with reduced noise.
+
+2. **Joint Bilateral Filtering (a_nr)**: Using the flash image as a guide significantly improves edge preservation while still reducing noise. Fine details from objects in the scene begin to emerge, but the overall lighting remains natural.
+
+3. **Detail Transfer (a_detail)**: Texture and fine details from the flash image are transferred to the filtered ambient image. This reintroduces important visual information while maintaining the natural lighting of the ambient image.
+
+4. **Shadow/Specularity Correction (a_final)**: The shadow and specularity mask correctly identifies flash artifacts, particularly in shadowed areas, and replaces them with corresponding regions from the basic bilateral filtered image. This creates a more natural, evenly lit appearance.
+
+#### 3.1.3 Final Result Analysis
 
 ![Pair 1 - Final Comparison](results_part3/pair1_bilateral/comparison_bilateral.png)
 *Figure 22: Side-by-side comparison of ambient, flash, and final bilateral filtered result for the custom image pair.*
 
-#### 3.1.3 Analysis of Results
+The final result successfully combines the strengths of both input images:
 
-The ambient image shows significant noise in the darker areas, while the flash image has clear details but lacks the natural lighting of the ambient image. The bilateral filtering pipeline effectively combines the strengths of both images by:
+1. **Improved Detail**: The processed image shows significantly more detail than the ambient image, especially in darker regions where textures are now clearly visible.
 
-1. Removing noise from the ambient image through basic bilateral filtering
-2. Preserving edge details from the flash image through joint bilateral filtering
-3. Transferring fine texture details from the flash image
-4. Correcting flash artifacts using shadow and specularity detection
+2. **Natural Lighting**: Unlike the flash image, the processed result maintains the natural lighting and atmosphere of the ambient image, avoiding the harsh, flat appearance of direct flash.
 
-The result is a clean, detailed image with natural lighting that would be impossible to achieve with a single exposure in the given lighting conditions.
+3. **Noise Reduction**: The pervasive noise in the ambient image has been effectively eliminated without sacrificing important details.
+
+4. **Shadow Correction**: Hard shadows cast by the flash have been significantly reduced, resulting in a more balanced, natural-looking image.
+
+The difference images provide further insight into what each processing step contributes:
+
+![Pair 1 - Difference Images](results_part3/pair1_bilateral/differences.png)
+*Figure 23: Difference images showing the changes introduced at each processing stage, highlighting what each step contributes to the final result.*
+
+The mask (rightmost image) effectively identifies areas where flash artifacts are present, particularly showing strong detection in shadowed regions where the flash created harsh transitions.
 
 ### 3.2 Gradient Domain Processing on Custom Image Pair
 
@@ -391,59 +398,82 @@ The second image pair features a scene with mixed matte and specular surfaces, m
 #### 3.2.1 Input Images
 
 ![Pair 2 - Ambient Image](results_part3/pair2_gradient/ambient.png)
-*Figure 23: Ambient image from pair 2, showing natural lighting but lacking detail in darker regions.*
+*Figure 24: Ambient image from pair 2, showing a scene with mixed materials including reflective surfaces.*
 
 ![Pair 2 - Flash Image](results_part3/pair2_gradient/flash.png)
-*Figure 24: Flash image from pair 2, with clear details but harsh reflections on specular surfaces.*
+*Figure 25: Flash image from pair 2, with clear details but strong reflections on the specular surfaces.*
+
+The ambient image shows a scene with mixed reflective and matte surfaces. While it has natural lighting, it lacks detail in many regions and shows significant noise in darker areas. The flash image reveals much more detail but introduces strong specular reflections on shiny surfaces and creates harsh lighting transitions and unnatural shadows.
 
 #### 3.2.2 Processing Steps and Intermediate Results
 
-The gradient domain processing pipeline was applied with the following optimal parameters:
-- sigma = 5.0
-- tau_s = 0.12
-- boundary_type = "ambient"
-- init_type = "average"
+The gradient domain approach begins with analyzing the relationship between the gradients in both images:
 
 ![Pair 2 - Coherency Map](results_part3/pair2_gradient/coherency_map.png)
-*Figure 25: Coherency map for the custom image pair, showing where gradient directions in flash and ambient images align.*
+*Figure 26: Coherency map for the custom image pair, showing where gradient directions in flash and ambient images align.*
+
+The coherency map is particularly revealing, showing strong alignment (brighter regions) along important structural edges in the scene, while showing lower coherency (darker regions) in areas where the flash created artifacts or specular reflections. This information helps the algorithm decide which image's gradients to trust in different regions.
 
 ![Pair 2 - Saturation Weight](results_part3/pair2_gradient/saturation_weight.png)
-*Figure 26: Saturation weight map for the custom image pair, identifying potentially saturated regions in the flash image.*
+*Figure 27: Saturation weight map for the custom image pair, identifying potentially saturated regions in the flash image.*
+
+The saturation weight map clearly identifies areas where the flash has caused oversaturation (shown as brighter regions), particularly on reflective surfaces. These regions will rely more heavily on the ambient image's gradients in the final fusion.
 
 ![Pair 2 - Gradient Field Visualization](results_part3/pair2_gradient/gradient_fields.png)
-*Figure 27: Visualization of the gradient fields for the custom image pair, showing the original and fused gradients.*
+*Figure 28: Visualization of the gradient fields for the custom image pair, showing how gradients from both images are combined into the fused gradient field.*
+
+The gradient field visualization demonstrates how the algorithm intelligently combines gradient information from both images. The fused gradient field (right) preserves important structural edges from both images while avoiding the harsh flash-induced gradients seen in the flash image's gradient field (middle).
 
 #### 3.2.3 Final Result and Analysis
 
 ![Pair 2 - Gradient Domain Results](results_part3/pair2_gradient/results.png)
-*Figure 28: Complete results of gradient domain processing on the custom image pair, showing the input images, intermediate maps, and final fused image.*
+*Figure 29: Complete results of gradient domain processing showing all components: original images, coherency and saturation maps, fused result, and the difference image.*
+
+The final fused image effectively combines the advantages of both input images:
 
 ![Pair 2 - Final Comparison](results_part3/pair2_gradient/comparison_gradient.png)
-*Figure 29: Side-by-side comparison of ambient, flash, and final gradient domain processed result for the custom image pair.*
+*Figure 30: Side-by-side comparison of ambient, flash, and final gradient domain processed result for the custom image pair.*
 
-The gradient domain processing successfully combines the advantages of both input images:
+The gradient domain processing has achieved several significant improvements:
 
-1. **Detail Enhancement**: The fused image preserves fine details from the flash image, particularly in darker regions of the ambient image.
-2. **Natural Appearance**: The overall tone and lighting from the ambient image are maintained, avoiding the harsh lighting of the flash image.
-3. **Handling of Specular Surfaces**: The saturated and specular regions in the flash image are handled gracefully, with the algorithm preferring ambient image gradients in these areas.
-4. **Edge-Aware Fusion**: The coherency map ensures that consistent edges are preserved while inconsistent ones (likely flash artifacts) are suppressed.
+1. **Enhanced Detail with Natural Appearance**: The fused image preserves the ambient image's natural lighting while incorporating the detailed edge information from the flash image. The result has significantly more detail than the ambient image but avoids the harsh, unnatural appearance of the flash image.
 
-The gradient domain approach is particularly effective for this image pair due to the presence of both matte surfaces (where flash details are useful) and specular surfaces (where flash creates unwanted reflections). The result is a natural-looking image with enhanced details.
+2. **Specular Reflection Handling**: Areas with strong specular reflections in the flash image have been gracefully handled, with the algorithm relying more on ambient image gradients in these regions. This creates a more balanced, natural appearance.
 
-### 3.3 Comparison of Techniques
+3. **Tone Preservation**: The overall tone and contrast of the ambient image are well preserved, maintaining the natural feel of the scene while enhancing details.
 
-Both bilateral filtering and gradient domain processing successfully enhance the custom flash/no-flash image pairs, but each technique has its strengths:
+4. **Shadow Reduction**: Harsh shadows from the flash have been significantly reduced, creating more even lighting throughout the image.
 
-1. **Bilateral Filtering**:
-   - Excels at noise reduction in dark regions
-   - Produces sharper details in the final image
-   - Better at handling shadows cast by the flash
-   - Faster processing time
+The difference image (bottom right of Figure 29) highlights how the gradient domain processing has primarily enhanced structural details while maintaining the overall luminance distribution of the ambient image.
 
-2. **Gradient Domain Processing**:
-   - Better preserves the overall tone and contrast of the ambient image
-   - More natural handling of specular surfaces
-   - Smoother transitions between light and dark regions
-   - More robust to alignment issues between flash and ambient images
+### 3.3 Comparison of Techniques and Application Suitability
 
-The choice between these techniques depends on the specific characteristics of the scene and the desired outcome. Bilateral filtering is preferable for noisy, low-light scenes where detail enhancement is the primary goal, while gradient domain processing is better suited for scenes with challenging lighting conditions and reflective surfaces. 
+Both bilateral filtering and gradient domain processing successfully enhanced the custom flash/no-flash image pairs, but their results show distinct characteristics that make each suitable for different scenarios:
+
+1. **Bilateral Filtering Strengths** (as seen in Pair 1):
+   - Superior noise reduction in very dark regions
+   - Greater preservation of fine textural details
+   - More pronounced detail enhancement, resulting in higher perceived sharpness
+   - Better handling of flash-induced shadows through the explicit shadow mask
+
+2. **Gradient Domain Processing Strengths** (as seen in Pair 2):
+   - Better preservation of the ambient image's overall tonal character
+   - More natural handling of specular reflections and highly saturated areas
+   - Smoother transitions in areas with lighting gradients
+   - More consistent color rendition across the image
+
+The choice between these techniques should be guided by the specific characteristics of the scene and the desired outcome:
+
+- **Use Bilateral Filtering When**:
+  - Working with very low-light scenes with significant noise
+  - When maximum detail recovery is the primary goal
+  - When sharp, well-defined edges are desired
+  - In scenes with strong shadows cast by the flash
+
+- **Use Gradient Domain Processing When**:
+  - Working with scenes containing specular or reflective surfaces
+  - When preserving the natural tonal character of the scene is important
+  - In scenes with subtle lighting gradients that should be preserved
+  - When a more natural, less "enhanced" look is desired
+
+These custom examples demonstrate the effectiveness of both approaches on real-world images, showing how each technique can be applied to address specific photographic challenges in flash/no-flash photography. 
